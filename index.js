@@ -10,12 +10,22 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
+  let name = 0;
   console.log('a user connected');
+  socket.broadcast.emit('chat message', "a user connected");
+  console.log(socket.id);
+  io.to(socket.id).emit('chat message', "What is your name?");
   socket.on('disconnect', () => {
     console.log('user disconnected');
+    io.emit('chat message', "user disconnected");
   });
   socket.on('chat message', (msg) => {
-    io.emit('chat message', msg);
+    if (!name) {
+      name = msg;
+      io.emit('chat message', `${name} joined the chat.`);
+    } else {
+      io.emit('chat message', `${name}: ${msg}`);
+    }
   });
 
 });
